@@ -1,0 +1,71 @@
+service: candidate
+
+plugins:
+  - serverless-python-requirements
+  - serverless-plugin-cloudwatch-dashboard
+
+provider:
+  name: aws
+  runtime: python3.7
+  stage: dev
+  region: eu-west-1
+
+  environment:
+    CANDIDATE_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: "*"
+
+package:
+    exclude:
+        - node_modules/**
+
+custom:
+  pythonRequirements:
+      dockerizePip: non-linux
+
+functions:
+  postCandidate:
+    handler: app/candidate.post_candidate
+    memorySize: 128
+    description: POST candidate
+    events:
+      - http: 
+          path: candidates
+          method: post
+
+  getCandidate:
+    handler: app/candidate.get_candidate
+    memorySize: 128
+    description: GET all candidates
+    events:
+      - http: 
+          path: candidates
+          method: get
+
+resources:
+  Resources:
+    CandidatesDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: "id"
+            AttributeType: "S"   
+        KeySchema:
+          -
+            AttributeName: "id"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: "NEW_AND_OLD_IMAGES"
+        TableName: ${self:provider.environment.CANDIDATE_TABLE}
