@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Event Scheduler</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.2"></script>
+  <script>
+    function addMemberField() {
+      const container = document.getElementById("members");
+      const field = document.createElement("div");
+      field.className = "member";
+      field.innerHTML = `
+        <input type="text" placeholder="Name" class="input name" required>
+        <input type="email" placeholder="Email" class="input email" required>
+      `;
+      container.appendChild(field);
+    }
+
+    function prepareForm() {
+      const form = document.getElementById("eventForm");
+      form.addEventListener("submit", function (e) {
+        const members = [];
+        document.querySelectorAll(".member").forEach(div => {
+          members.push({
+            name: div.querySelector(".name").value,
+            email: div.querySelector(".email").value
+          });
+        });
+        const hidden = document.getElementById("members-data");
+        hidden.value = JSON.stringify(members);
+      });
+    }
+
+    window.onload = prepareForm;
+  </script>
+</body>
+</html>

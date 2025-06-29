@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>📅 Event Scheduler</h1>
+<p><strong>Today:</strong> {{ now }}</p>
+
+<form id="eventForm" action="/add" method="post" class="form">
+  <input name="title" placeholder="Event Title" required>
+  <textarea name="description" placeholder="Description"></textarea>
+  <input name="start_time" type="datetime-local" required>
+  <input name="end_time" type="datetime-local" required>
+
+  <h3>Members</h3>
+  <div id="members">
+    <div class="member">
+      <input type="text" placeholder="Name" class="input name" required>
+      <input type="email" placeholder="Email" class="input email" required>
+    </div>
+  </div>
+  <button type="button" onclick="addMemberField()">+ Add Member</button>
+  <input type="hidden" name="members" id="members-data">
+  <button type="submit">Add Event</button>
+</form>
+
+<h2>Upcoming Events</h2>
+{% for e in events %}
+  <div class="event">
+    <strong>{{ e.title }}</strong><br>
+    <small>{{ e.start_time }} → {{ e.end_time }}</small><br>
+    {{ e.description }}<br>
+    <em>Members:</em>
+    <ul>
+      {% for m in e.members %}
+        <li>{{ m.name }} ({{ m.email }})</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endfor %}
+{% endblock %}
